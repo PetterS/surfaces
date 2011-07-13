@@ -26,7 +26,10 @@ The following external libraries are required:
 * Armadillo <http://arma.sourceforge.net>
 * Clp <https://projects.coin-or.org/Clp>
 
-If you are using Visual C++ 2010, I have set up a page from which these packages can be downloaded and automatically installed. It uses a package manager.
+In addition, the following third-party libraries, well-known to the computer vision community, are also required:
+* HOCR1.02 
+* QPBO-v1.3
+They can be downloaded to the correct place automatically by executing the script "download_thirdparty.sh" from the "software/thirdparty" folder. The subfolders also contain the links to the appropriate download pages.
 
 It is recommended to compile the software in 64-bit, but the examples in the EMMCVPR paper should run even in 32-bit.
 

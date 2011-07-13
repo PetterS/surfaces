@@ -1,0 +1,83 @@
+
+
+==============
+Requirements
+==============
+
+
+This software can be compiled under Microsoft Visual C++ 2010 or GCC 4.5 or later. Using earlier compilers is not possible, due to extensive use of C++0x features.
+
+Tested compilers:
+-----------------------
+ * Microsoft Visual C++ 2010 (64-bit)
+ * g++ (GCC) 4.5.0  (32-bit Cygwin)
+ * g++-4.5 (Ubuntu/Linaro 4.5.1-7ubuntu2) 4.5.1
+
+
+I've written the software in Visual Studio 2010. However, it should work in other compilers as well, since I haven't used any Microsoft-specific stuff. Project files are included. If you're using gcc, you'll need to add the switch
+
+  -std=c++0x
+
+to enable C++0x features (auto declarations and lambda functions are used).
+
+
+The following external libraries are required:
+
+* Armadillo <http://arma.sourceforge.net>
+* Clp <https://projects.coin-or.org/Clp>
+
+If you are using Visual C++ 2010, I have set up a page from which these packages can be downloaded and automatically installed. It uses a package manager.
+
+It is recommended to compile the software in 64-bit, but the examples in the EMMCVPR paper should run even in 32-bit.
+
+======================================
+Before you begin (Visual Studio 2010)
+======================================
+
+If you're using the supplied project files, there are a couple of things you'll need to do before you begin.
+
+* Make sure Visual Studio finds Armadillo and Clp.
+
+  ** "Property Manager"->"curvature3d"->"Release |x64"->"Microsoft.Cpp.x64.user"
+  ** Right-click and choose "Properties"
+  ** Add your include directories and lib directories to "VC++ Directories"
+
+  This will already have been taken care of if the package manager mentioned above was used.
+
+* Change the project's Intermediate directory to a suitable location. 
+
+* Change the project's "Linker"->"Input"->"Additional Dependencies" if you're not linking to MATLABs BLAS and LAPACK. If you have MATLAB, I can recommend using it together with Armadillo. It works great. Otherwise, you'll have to link to a BLAS/LAPACK of your own. Alternatively, you can disable it in Armadillo if you don't have any.
+
+
+=======================
+Before you begin (GCC)
+=======================
+
+I have been using the supplied Makefile to build the program. Gcc version 4.5 or laters is required. Open the Makefile and edit the directories and specify the compiler if you have several installed.
+
+Clp has to be downloaded and compiled. This should not be very difficult. The following instructions are available at https://projects.coin-or.org/Clp :
+
+  1. svn co https://projects.coin-or.org/svn/Clp/stable/1.12 coin-Clp
+  2. cd coin-Clp
+  3. ./configure -C
+  4. make
+  5. make test
+  6. make install
+
+Then the Makefile has to be edited so that CLPINCLUDEDIR and CLPLIBDIR point to the correct location. After this, the software can be compiled with
+
+  1. make
+
+
+===================
+Generating figures
+===================
+
+The figures from the paper can be generated via the scripts in the "bin" folder. They will call the main program with the correct parameters.
+
+
+============
+X3D viewer
+============
+
+To view the output, you'll need an X3D viewer. FreeWRL/FreeX3D works well for this.

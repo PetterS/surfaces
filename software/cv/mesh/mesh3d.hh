@@ -165,8 +165,8 @@ public:
 	//
 	// Drawing functions
 	//
-	void draw(std::string filename, int* cell_labels=0) const;
-	void draw_faces(std::string filename, int* face_labels=0) const;
+	void draw(std::string filename, int* cell_labels=0, bool html_file=false) const;
+	void draw_faces(std::string filename, int* face_labels=0, bool html_file=false) const;
 
 	//
 	// Refinement functions
@@ -175,9 +175,8 @@ public:
 
 protected:
 
-	void X3D_start(std::ofstream& out) const;
-	void X3D_end(std::ofstream& out) const;
-	void draw_face(std::ofstream& out, uint f, bool reverse) const;
+	void X3D_start(std::ofstream& out, bool html_file) const;
+	void X3D_end(std::ofstream& out, bool html_file) const;
 
 	void get_polygon_points(size_t face_idx, std::vector<uint>& point_indices) const;
 	void get_polygon_points(size_t face_idx, std::vector<Mesh3DPoint>& points) const;

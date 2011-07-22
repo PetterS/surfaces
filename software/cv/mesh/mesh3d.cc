@@ -584,11 +584,26 @@ int Mesh3D::match(size_t first, size_t second, size_t e) const
 	}
 }
 
-void Mesh3D::X3D_start(ofstream& out) const
+void Mesh3D::X3D_start(ofstream& out, bool html_file) const
 {
-	out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
-	out << "<!DOCTYPE X3D PUBLIC \"ISO//Web3D//DTD X3D 3.0//EN\" \"http://www.web3d.org/specifications/x3d-3.0.dtd\">" << endl;
-	out << "<X3D>" << endl;
+  if (html_file) {
+    out << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" << endl;
+    out << "<html xmlns=\"http://www.w3.org/1999/xhtml\">" << endl;
+    out << "<head>" << endl;
+    out << "  <meta http-equiv=\"Content-Type\"/>" << endl;
+    out << "  <title>Viewer Test</title>" << endl;
+    out << "  <link rel=\"stylesheet\" type=\"text/css\" href=\"x3dom/x3dom.css\"/>" << endl;
+    out << "  <script type=\"text/javascript\" src=\"x3dom/x3dom.js\"> </script>" << endl;
+    out << "</head>" << endl;
+    out << "<body>" << endl;
+    out << "<h1>Program output</h1>" << endl;
+    out << "<X3D xmlns=\"http://www.web3d.org/specifications/x3d-namespace\" showStat=\"false\" showLog=\"false\" x=\"0px\" y=\"0px\" width=\"500px\" height=\"500px\">" << endl;
+  }
+  else {
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+	  out << "<!DOCTYPE X3D PUBLIC \"ISO//Web3D//DTD X3D 3.0//EN\" \"http://www.web3d.org/specifications/x3d-3.0.dtd\">" << endl;
+	  out << "<X3D>" << endl;
+  }
 	out << "<Scene>" << endl;
 	out << "	<Background skyColor='1 1 1' />" << endl;
 	out << "	<Viewpoint position=\'0 0 ";
@@ -603,96 +618,21 @@ void Mesh3D::X3D_start(ofstream& out) const
 	out << "		<DirectionalLight direction=\'0 0 1\' intensity=\'0.4\'/> " << endl;
 }
 
-void Mesh3D::X3D_end(ofstream& out) const
+void Mesh3D::X3D_end(ofstream& out, bool html_file) const
 {
 	out << "	</Group>" << endl;
 	out << "  </Scene>" << endl;
 	out << "</X3D>" << endl;
+  if (html_file) {
+    out << "</body>" << endl;
+    out << "</html>" << endl;
+  }
 }
 
-void Mesh3D::draw_face(ofstream& out, uint f, bool reverse) const
-{
-	size_t nEdges = face_[f].edge_idx_.size();
-
-	std::vector<Mesh3DPoint> points;
-	for (uint k=0; k < nEdges; k++) {
-
-		std::map<uint,uint> point_count;
-
-		uint edge_idx = face_[f].edge_idx_[k];
-		uint next_edge_idx = face_[f].edge_idx_[(k+1) % nEdges];
-
-		if (0) {
-			out << "	<Shape>" << endl;
-			out << "		<Appearance>" << endl;
-			out << "			<Material diffuseColor=\'0 0 0\' emissiveColor=\'0 0 0\'/>" << endl;
-			out << "		</Appearance>" << endl;
-			out << "		<IndexedLineSet coordIndex=\'0 1\'>" << endl;
-			out << "			<Coordinate point='";
-			Mesh3DPoint from = point_[edge_[edge_idx].from_idx_];
-			Mesh3DPoint to = point_[edge_[edge_idx].to_idx_];
-			out << from.x_ << " " << from.y_ << " " << from.z_ << ", ";
-			out << to.x_ << " " << to.y_ << " " << to.z_ << ", ";
-			out << "\'/>" << endl;
-			out << "		</IndexedLineSet>" << endl;
-			out << "	</Shape>" << endl;
-		}
-
-		point_count[edge_[edge_idx].to_idx_]++;
-		point_count[edge_[edge_idx].from_idx_]++;
-		point_count[edge_[next_edge_idx].to_idx_]++;
-		point_count[edge_[next_edge_idx].from_idx_]++;
-
-		if (point_count.size() != 3) {
-			throw runtime_error("point_count.size() != 3");
-		}
-		uint end_point = std::numeric_limits<uint>::max();
-		uint start_point = std::numeric_limits<uint>::max();
-
-		for (std::map<uint,uint>::iterator it = point_count.begin(); it != point_count.end(); it++) {
-			if (it->second == 2) {
-				end_point = it->first;
-				break;
-			}
-		}
-
-		start_point = (edge_[edge_idx].to_idx_ == end_point) ? 
-			edge_[edge_idx].from_idx_ : edge_[edge_idx].to_idx_;
-
-		points.push_back(point_[end_point]);
-	}
-
-	//Actually draw the face
-	out << "	<Shape>" << endl;
-	out << "		<Appearance>" << endl;
-	out << "			<Material diffuseColor='0 0.5 1'/>" << endl;
-	out << "		</Appearance>" << endl;
-	out << "		<IndexedFaceSet coordIndex=\'";
-
-	if (!reverse) {
-		for (size_t i=0; i<points.size(); ++i) {
-			out << i << ", ";
-		}
-	}
-	else {
-		for (int i=int(points.size()-1); i>=0; --i) {
-			out << i << ", ";
-		}
-	}
-	out << "\'>" << endl;
-	out << "			<Coordinate point='";
-	for (int i=0; i<points.size(); ++i) {
-		out << points[i].x_ << " " << points[i].y_ << " " << points[i].z_ << ", ";
-	}
-	out << "\'/>" << endl;
-	out << "		</IndexedFaceSet>" << endl;
-	out << "	</Shape>" << endl;
-}
-
-void Mesh3D::draw(std::string filename, int* cell_labels) const
+void Mesh3D::draw(std::string filename, int* cell_labels, bool html_file) const
 {
 	ofstream out(filename.c_str());
-	X3D_start(out);
+	X3D_start(out, html_file);
 
 
 	if (edge_.size() >= 3000 || edge_.size()==0) {
@@ -740,24 +680,89 @@ void Mesh3D::draw(std::string filename, int* cell_labels) const
 	//
 	// Draw faces
 	//
+
 	if (cell_labels) {
+    out << "<Shape>" << endl;
+	  out << "	<Appearance>" << endl;
+	  out << "		<Material diffuseColor=\'0 0.5 1\'/>" << endl;
+	  out << "	</Appearance>" << endl;
+
+    out << "	<IndexedFaceSet coordIndex=\'";
 		for (uint i=0; i < face_.size(); i++) {
 			const vector<uint>& adjacent = adjacent_cells(i);
 			if (adjacent.size()==2 && cell_labels[adjacent[0]] != cell_labels[adjacent[1]]) {
-				draw_face(out, i, false);
-				draw_face(out, i, true); 
+
+        //
+        // Get all points
+        //
+        size_t nEdges = face_[i].edge_idx_.size();
+        std::vector<uint> points;
+	      for (uint k=0; k < nEdges; k++) {
+
+		      std::map<uint,uint> point_count;
+
+		      uint edge_idx = face_[i].edge_idx_[k];
+		      uint next_edge_idx = face_[i].edge_idx_[(k+1) % nEdges];
+
+		      point_count[edge_[edge_idx].to_idx_]++;
+		      point_count[edge_[edge_idx].from_idx_]++;
+		      point_count[edge_[next_edge_idx].to_idx_]++;
+		      point_count[edge_[next_edge_idx].from_idx_]++;
+
+		      if (point_count.size() != 3) {
+			      throw runtime_error("point_count.size() != 3");
+		      }
+		      uint end_point = std::numeric_limits<uint>::max();
+		      uint start_point = std::numeric_limits<uint>::max();
+
+		      for (std::map<uint,uint>::iterator it = point_count.begin(); it != point_count.end(); it++) {
+			      if (it->second == 2) {
+				      end_point = it->first;
+				      break;
+			      }
+		      }
+
+		      start_point = (edge_[edge_idx].to_idx_ == end_point) ? 
+			      edge_[edge_idx].from_idx_ : edge_[edge_idx].to_idx_;
+
+		      points.push_back(end_point);
+	      }
+        // We have all points
+
+		    for (size_t i=0; i<points.size(); ++i) {
+			    out << points[i] << " ";
+		    }
+        out << "-1, ";
+		    for (int i=int(points.size()-1); i>=0; --i) {
+			    out << points[i] << " ";
+		    }
+        out << "-1, ";
 			}
 		}
+    out << "\'>" << endl;
+
+    out << "    <Coordinate point=\'";
+    size_t ip;
+    for (ip=0; ip<point_.size()-1; ++ip) {
+		  out << point_[ip].x_ << " " << point_[ip].y_ << " " << point_[ip].z_ << ", ";
+	  }
+	  if (ip < point_.size()) {
+		  out << point_[ip].x_ << " " << point_[ip].y_ << " " << point_[ip].z_;
+	  }
+    out << "\'/>" << endl;
+
+    out << "  </IndexedFaceSet>" << endl;
+	  out << "</Shape>"<<endl;
 	}
 
-	X3D_end(out);
+	X3D_end(out, html_file);
 }
 
 
-void Mesh3D::draw_faces(std::string filename, int* face_labels) const
+void Mesh3D::draw_faces(std::string filename, int* face_labels, bool html_file) const
 {
 	ofstream out(filename.c_str());
-	X3D_start(out);
+	X3D_start(out, html_file);
 
 
 	if (edge_.size() >= 3000) {
@@ -806,17 +811,89 @@ void Mesh3D::draw_faces(std::string filename, int* face_labels) const
 	// Draw faces
 	//
 	if (face_labels) {
+
+    out << "<Shape>" << endl;
+	  out << "	<Appearance>" << endl;
+	  out << "		<Material diffuseColor=\'0 0.5 1\'/>" << endl;
+	  out << "	</Appearance>" << endl;
+
+    out << "	<IndexedFaceSet coordIndex=\'";
 		for (uint i=0; i < face_.size(); i++) {
-			if (face_labels[2*i]) {
-				draw_face(out,i,false);
-			}
-			if (face_labels[2*i+1]) {
-				draw_face(out,i,true);
+			const vector<uint>& adjacent = adjacent_cells(i);
+			if (face_labels[2*i] || face_labels[2*i+1]) {
+        auto& f = face_[i];
+
+        //
+        // Get all points
+        //
+        size_t nEdges = face_[i].edge_idx_.size();
+        std::vector<uint> points;
+	      for (uint k=0; k < nEdges; k++) {
+
+		      std::map<uint,uint> point_count;
+
+		      uint edge_idx = face_[i].edge_idx_[k];
+		      uint next_edge_idx = face_[i].edge_idx_[(k+1) % nEdges];
+
+		      point_count[edge_[edge_idx].to_idx_]++;
+		      point_count[edge_[edge_idx].from_idx_]++;
+		      point_count[edge_[next_edge_idx].to_idx_]++;
+		      point_count[edge_[next_edge_idx].from_idx_]++;
+
+		      if (point_count.size() != 3) {
+			      throw runtime_error("point_count.size() != 3");
+		      }
+		      uint end_point = std::numeric_limits<uint>::max();
+		      uint start_point = std::numeric_limits<uint>::max();
+
+		      for (std::map<uint,uint>::iterator it = point_count.begin(); it != point_count.end(); it++) {
+			      if (it->second == 2) {
+				      end_point = it->first;
+				      break;
+			      }
+		      }
+
+		      start_point = (edge_[edge_idx].to_idx_ == end_point) ? 
+			      edge_[edge_idx].from_idx_ : edge_[edge_idx].to_idx_;
+
+		      points.push_back(end_point);
+	      }
+        // We have all points
+
+
+
+        if (face_labels[2*i]) {
+		      for (size_t i=0; i<points.size(); ++i) {
+			      out << points[i] << " ";
+		      }
+          out << "-1, ";
+        }
+        else {
+		      for (int i=int(points.size()-1); i>=0; --i) {
+			      out << points[i] << " ";
+		      }
+          out << "-1, ";
+        }
+
 			}
 		}
+    out << "\'>" << endl;
+
+    out << "    <Coordinate point=\'";
+    size_t ip;
+    for (ip=0; ip<point_.size()-1; ++ip) {
+		  out << point_[ip].x_ << " " << point_[ip].y_ << " " << point_[ip].z_ << ", ";
+	  }
+	  if (ip < point_.size()) {
+		  out << point_[ip].x_ << " " << point_[ip].y_ << " " << point_[ip].z_;
+	  }
+    out << "\'/>" << endl;
+
+    out << "  </IndexedFaceSet>" << endl;
+	  out << "</Shape>"<<endl;
 	}
 
-	X3D_end(out);
+	X3D_end(out, html_file);
 }
 
 

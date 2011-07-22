@@ -324,6 +324,7 @@ void curvature_3d_qpbo(Mesh3D& mesh, const Curv3D_Options& options,
 
 	statusTry("Drawing mesh...");
 	mesh.draw("test.x3d",labels);
+  mesh.draw("test.xhtml",labels, true);
 	statusOK();
 
 	delete[] labels;

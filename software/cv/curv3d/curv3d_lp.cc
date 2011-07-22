@@ -160,6 +160,7 @@ void curvature_3d_lp(Mesh3D& mesh, const Curv3D_Options& options,
 
 	statusTry("Drawing data term...");
 	mesh.draw_faces("x3d/fixed_faces.x3d",&labels[0]);
+  mesh.draw_faces("x3d/fixed_faces.xhtml",&labels[0], true);
 	statusOK();
 
 
@@ -234,11 +235,13 @@ void curvature_3d_lp(Mesh3D& mesh, const Curv3D_Options& options,
 
 		statusTry("Drawing result (cells)...");
 		mesh.draw("x3d/cells.x3d",&labels[cells_var_offset]);
+    mesh.draw("x3d/cells.xhtml",&labels[cells_var_offset], true);
 		statusOK();
 	}
 
 	statusTry("Drawing result (faces)...");
 	mesh.draw_faces("x3d/faces.x3d",&labels[0]);
+  mesh.draw_faces("x3d/faces.xhtml",&labels[0], true);
 	statusOK();
 
 	//
